@@ -125,8 +125,30 @@ class _InventoryPageState extends State<InventoryPage> {
                       onPressed: () => _sellItem(item),
                     ),
                     onLongPress: () async {
-                      await DBHelper.deleteItem(item.id!);
-                      setState(() {});
+                      final shouldDelete = await showDialog<bool>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("Delete Item"),
+                            content: Text("Are you sure you want to delete '${item.name}'?"),
+                            actions: [
+                              TextButton(
+                                child: const Text("Cancel"),
+                                onPressed: () => Navigator.of(context).pop(false),
+                              ),
+                              TextButton(
+                                child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                                onPressed: () => Navigator.of(context).pop(true),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (shouldDelete == true) {
+                        await DBHelper.deleteItem(item.id!);
+                        setState(() {});
+                      }
                     },
                   );
                 },

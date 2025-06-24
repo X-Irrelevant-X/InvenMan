@@ -102,7 +102,8 @@ class _InventoryPageState extends State<InventoryPage> {
           onChanged: (value) => setState(() => sortBy = value!),
           items: const [
             DropdownMenuItem(value: 'name', child: Text("Name")),
-            DropdownMenuItem(value: 'price', child: Text("Price")),
+            DropdownMenuItem(value: 'price_asc', child: Text("Price: Low to High")),
+            DropdownMenuItem(value: 'price_desc', child: Text("Price: High to Low")),
             DropdownMenuItem(value: 'category', child: Text("Category")),
           ],
         ),

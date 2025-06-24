@@ -52,9 +52,28 @@ class DBHelper {
 
   static Future<List<Item>> fetchItems({String sortBy = 'name'}) async {
     final dbClient = await db;
-    final maps = await dbClient.query('items', orderBy: sortBy);
-    return maps.map((map) => Item.fromMap(map)).toList();
+
+    String orderByColumn = 'name';
+    String order = 'ASC';
+
+    if (sortBy == 'price_asc') {
+      orderByColumn = 'price';
+      order = 'ASC';
+    } else if (sortBy == 'price_desc') {
+      orderByColumn = 'price';
+      order = 'DESC';
+    } else if (sortBy == 'category') {
+      orderByColumn = 'category';
+    }
+
+    final List<Map<String, dynamic>> maps = await dbClient.query(
+      'items',
+      orderBy: '$orderByColumn $order',
+    );
+
+    return List.generate(maps.length, (i) => Item.fromMap(maps[i]));
   }
+
 
   static Future<void> insertSoldItem(SoldItem item) async {
     final dbClient = await db;

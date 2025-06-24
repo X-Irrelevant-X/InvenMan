@@ -1,3 +1,3 @@
-# ivenman
+# IvenMan
 
-A new Flutter project.
+Inventory Management App.

@@ -1,4 +1,3 @@
-// models/item_history.dart
 class ItemHistory {
   int? id;
   String name;

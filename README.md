@@ -1,3 +1,3 @@
-# IvenMan
+# InvenMan
 
 Inventory Management App.

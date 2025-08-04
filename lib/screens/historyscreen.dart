@@ -1,26 +1,25 @@
+// screens/historyscreen.dart
 import 'package:flutter/material.dart';
 import 'package:ivenman/db.dart';
-import 'package:ivenman/models/sold_items.dart';
+import 'package:ivenman/models/item_history.dart';
 
-class SoldItemsPage extends StatelessWidget {
-  const SoldItemsPage({super.key});
+class HistoryPage extends StatelessWidget {
+  const HistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<SoldItem>>(
-      future: DBHelper.fetchSoldItems(),
+    return FutureBuilder<List<ItemHistory>>(
+      future: DBHelper.fetchItemHistory(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-        final items = snapshot.data!;
+        final history = snapshot.data!;
         return ListView.builder(
-          itemCount: items.length,
+          itemCount: history.length,
           itemBuilder: (_, i) {
-            final item = items[i];
-            final profit = item.sellPrice - item.costPrice;
+            final item = history[i];
             return ListTile(
-              title: Text("${item.name} - ${item.date}"),
-              subtitle: Text(
-                  "Cost: \$${item.costPrice} | Sold: \$${item.sellPrice} | ${profit >= 0 ? 'Profit' : 'Loss'}: \$${profit.toStringAsFixed(2)}"),
+              title: Text("${item.name} - ${item.action}"),
+              subtitle: Text("${item.detail}\n${item.date}"),
             );
           },
         );

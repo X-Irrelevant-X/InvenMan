@@ -31,3 +31,5 @@ class SoldItem {
         date: map['date'],
       );
 }
+
+

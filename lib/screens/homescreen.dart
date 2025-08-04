@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final screens = const [
     InventoryPage(),
-    SoldItemsPage(),
+    HistoryPage(),
   ];
 
   @override
@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (index) => setState(() => _currentIndex = index),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Inventory'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Sold'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
         ],
       ),
     );

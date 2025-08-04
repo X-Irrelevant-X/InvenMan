@@ -97,15 +97,31 @@ class _InventoryPageState extends State<InventoryPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        DropdownButton<String>(
-          value: sortBy,
-          onChanged: (value) => setState(() => sortBy = value!),
-          items: const [
-            DropdownMenuItem(value: 'name', child: Text("Name")),
-            DropdownMenuItem(value: 'price_asc', child: Text("Price: Low to High")),
-            DropdownMenuItem(value: 'price_desc', child: Text("Price: High to Low")),
-            DropdownMenuItem(value: 'category', child: Text("Category")),
-          ],
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: sortBy,
+                  onChanged: (value) => setState(() => sortBy = value!),
+                  items: const [
+                    DropdownMenuItem(value: 'name', child: Text("Name")),
+                    DropdownMenuItem(value: 'price_asc', child: Text("Price: Low to High")),
+                    DropdownMenuItem(value: 'price_desc', child: Text("Price: High to Low")),
+                    DropdownMenuItem(value: 'category', child: Text("Category")),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: _showAddItemDialog,
+                icon: const Icon(Icons.add),
+                label: const Text("Add Item"),
+              ),
+            ],
+          ),
         ),
         Expanded(
           child: FutureBuilder<List<Item>>(
@@ -127,26 +143,24 @@ class _InventoryPageState extends State<InventoryPage> {
                     onLongPress: () async {
                       final shouldDelete = await showDialog<bool>(
                         context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text("Delete Item"),
-                            content: Text("Are you sure you want to delete '${item.name}'?"),
-                            actions: [
-                              TextButton(
-                                child: const Text("Cancel"),
-                                onPressed: () => Navigator.of(context).pop(false),
-                              ),
-                              TextButton(
-                                child: const Text("Delete", style: TextStyle(color: Colors.red)),
-                                onPressed: () => Navigator.of(context).pop(true),
-                              ),
-                            ],
-                          );
-                        },
+                        builder: (context) => AlertDialog(
+                          title: const Text("Delete Item"),
+                          content: Text("Are you sure to delete '${item.name}'?"),
+                          actions: [
+                            TextButton(
+                              child: const Text("Cancel"),
+                              onPressed: () => Navigator.pop(context, false),
+                            ),
+                            TextButton(
+                              child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                              onPressed: () => Navigator.pop(context, true),
+                            ),
+                          ],
+                        ),
                       );
-
                       if (shouldDelete == true) {
-                        await DBHelper.deleteItem(item.id!);
+                        await DBHelper.deleteItem(item.id!, item.name);
+                        if (!mounted) return;
                         setState(() {});
                       }
                     },
@@ -154,14 +168,6 @@ class _InventoryPageState extends State<InventoryPage> {
                 },
               );
             },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: FloatingActionButton.extended(
-            onPressed: _showAddItemDialog,
-            label: const Text("Add Item"),
-            icon: const Icon(Icons.add),
           ),
         ),
       ],

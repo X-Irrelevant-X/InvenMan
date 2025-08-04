@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/homescreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 
 class ThemeProvider with ChangeNotifier {
@@ -28,7 +31,18 @@ class ThemeProvider with ChangeNotifier {
   }
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (defaultTargetPlatform == TargetPlatform.windows ||
+      defaultTargetPlatform == TargetPlatform.linux ||
+      defaultTargetPlatform == TargetPlatform.macOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  } else {
+    
+  }
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),

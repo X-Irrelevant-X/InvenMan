@@ -25,7 +25,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_currentIndex == 0 ? 'InvenMan' : 'History'),
+        title: Center(
+          child: Text(
+            _currentIndex == 0 ? 'InvenMan' : 'History',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20, // Adjust font size as needed
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(

@@ -1,10 +1,12 @@
 class Item {
-  int? id;
-  String name;
-  String description;
-  double price;
-  String category;
-  int quantity;
+  final int? id;
+  final String name;
+  final String description;
+  final double price;
+  final String category;
+  final int quantity;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
 
   Item({
     this.id,
@@ -13,9 +15,24 @@ class Item {
     required this.price,
     required this.category,
     required this.quantity,
+    required this.createdAt,
+    this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
+  factory Item.fromJson(Map<String, dynamic> json) {
+    return Item(
+      id: json['id'],
+      name: json['name'],
+      description: json['description'],
+      price: json['price'].toDouble(),
+      category: json['category'],
+      quantity: json['quantity'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
@@ -23,15 +40,8 @@ class Item {
       'price': price,
       'category': category,
       'quantity': quantity,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
-
-  factory Item.fromMap(Map<String, dynamic> map) => Item(
-        id: map['id'],
-        name: map['name'],
-        description: map['description'],
-        price: map['price'],
-        category: map['category'],
-        quantity: map['quantity'],
-      );
 }

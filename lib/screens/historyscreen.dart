@@ -53,6 +53,13 @@ class HistoryPage extends StatelessWidget {
               }
             }
 
+            // For Edited: highlight what's updated
+            String editedText = '';
+            if (item.action == 'Edited') {
+              // Example detail: "Old Price: 5.00 → New Price: 6.00"
+              editedText = item.detail;
+            }
+
             // Build Profit/Loss text
             String profitLossText = '';
             if (costPrice != null && soldPrice != null) {

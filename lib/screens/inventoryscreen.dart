@@ -14,6 +14,8 @@ class InventoryPage extends StatefulWidget {
 class _InventoryPageState extends State<InventoryPage> {
   String sortBy = 'name';
 
+  final DateFormat dateFormat = DateFormat('h.mma, d MMMM, yyyy');
+
   void _showAddItemDialog() {
     final nameController = TextEditingController();
     final descController = TextEditingController();
@@ -28,11 +30,28 @@ class _InventoryPageState extends State<InventoryPage> {
         content: SingleChildScrollView(
           child: Column(
             children: [
-              TextField(controller: nameController, decoration: const InputDecoration(labelText: "Name")),
-              TextField(controller: descController, decoration: const InputDecoration(labelText: "Description")),
-              TextField(controller: priceController, decoration: const InputDecoration(labelText: "Price"), keyboardType: TextInputType.number),
-              TextField(controller: categoryController, decoration: const InputDecoration(labelText: "Category")),
-              TextField(controller: quantityController, decoration: const InputDecoration(labelText: "Quantity"), keyboardType: TextInputType.number),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: "Name"),
+              ),
+              TextField(
+                controller: descController,
+                decoration: const InputDecoration(labelText: "Description"),
+              ),
+              TextField(
+                controller: priceController,
+                decoration: const InputDecoration(labelText: "Price"),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: categoryController,
+                decoration: const InputDecoration(labelText: "Category"),
+              ),
+              TextField(
+                controller: quantityController,
+                decoration: const InputDecoration(labelText: "Quantity"),
+                keyboardType: TextInputType.number,
+              ),
             ],
           ),
         ),
@@ -40,17 +59,78 @@ class _InventoryPageState extends State<InventoryPage> {
           TextButton(
             onPressed: () async {
               final item = Item(
-                name: nameController.text,
-                description: descController.text,
-                price: double.parse(priceController.text),
-                category: categoryController.text,
-                quantity: int.parse(quantityController.text),
+                name: nameController.text.trim(),
+                description: descController.text.trim(),
+                price: double.parse(priceController.text.trim()),
+                category: categoryController.text.trim(),
+                quantity: int.parse(quantityController.text.trim()),
+                createdAt: DateTime.now(),
+                updatedAt: null,
               );
               await DBHelper.insertItem(item);
               Navigator.pop(context);
               setState(() {});
             },
             child: const Text("Add"),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showEditItemDialog(Item item) {
+    final descController = TextEditingController(text: item.description);
+    final priceController = TextEditingController(text: item.price.toString());
+    final quantityController = TextEditingController(text: item.quantity.toString());
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text("Edit Item"),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Name and category shown but disabled
+              TextField(
+                controller: TextEditingController(text: item.name),
+                decoration: const InputDecoration(labelText: "Name"),
+                enabled: false,
+              ),
+              TextField(
+                controller: descController,
+                decoration: const InputDecoration(labelText: "Description"),
+              ),
+              TextField(
+                controller: TextEditingController(text: item.category),
+                decoration: const InputDecoration(labelText: "Category"),
+                enabled: false,
+              ),
+              TextField(
+                controller: quantityController,
+                decoration: const InputDecoration(labelText: "Quantity"),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              final updatedItem = Item(
+                id: item.id,
+                name: item.name,
+                description: descController.text.trim(),
+                price: item.price,
+                category: item.category,
+                quantity: int.parse(quantityController.text.trim()),
+                createdAt: item.createdAt,
+                updatedAt: DateTime.now(),
+              );
+              await DBHelper.updateItem(updatedItem);
+              Navigator.pop(context);
+              setState(() {});
+            },
+            child: const Text("Update"),
           )
         ],
       ),
@@ -72,10 +152,19 @@ class _InventoryPageState extends State<InventoryPage> {
         actions: [
           TextButton(
             onPressed: () async {
-              final sellPrice = double.parse(sellController.text);
+              final sellPrice = double.parse(sellController.text.trim());
               if (item.quantity > 0) {
-                item.quantity -= 1;
-                await DBHelper.updateItem(item);
+                final updatedItem = Item(
+                  id: item.id,
+                  name: item.name,
+                  description: item.description,
+                  price: item.price,
+                  category: item.category,
+                  quantity: item.quantity - 1,
+                  createdAt: item.createdAt,
+                  updatedAt: DateTime.now(),
+                );
+                await DBHelper.updateItem(updatedItem);
                 await DBHelper.insertSoldItem(SoldItem(
                   name: item.name,
                   costPrice: item.price,
@@ -91,6 +180,13 @@ class _InventoryPageState extends State<InventoryPage> {
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    String formatted = DateFormat('h.m').format(date).toLowerCase();
+    String ampm = DateFormat('a').format(date).toLowerCase();
+    String dayMonthYear = DateFormat('d MMMM, yyyy').format(date);
+    return '$formatted$ampm, $dayMonthYear';
   }
 
   @override
@@ -129,41 +225,144 @@ class _InventoryPageState extends State<InventoryPage> {
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
               final items = snapshot.data!;
+              if (items.isEmpty) {
+                return const Center(child: Text('No items found.'));
+              }
               return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 itemCount: items.length,
                 itemBuilder: (_, i) {
                   final item = items[i];
-                  return ListTile(
-                    title: Text("${item.name} (\$${item.price})"),
-                    subtitle: Text("Qty: ${item.quantity}, Category: ${item.category}"),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.sell),
-                      onPressed: () => _sellItem(item),
-                    ),
-                    onLongPress: () async {
-                      final shouldDelete = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text("Delete Item"),
-                          content: Text("Are you sure to delete '${item.name}'?"),
-                          actions: [
-                            TextButton(
-                              child: const Text("Cancel"),
-                              onPressed: () => Navigator.pop(context, false),
+
+                  return Card(
+                    elevation: 3,
+                    margin: const EdgeInsets.symmetric(vertical: 6),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onLongPress: () async {
+                        final action = await showDialog<String>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("Choose Action"),
+                            actions: [
+                              TextButton(
+                                child: const Text("Edit"),
+                                onPressed: () => Navigator.pop(context, 'edit'),
+                              ),
+                              TextButton(
+                                child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                                onPressed: () => Navigator.pop(context, 'delete'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (action == 'edit') {
+                          _showEditItemDialog(item);
+                        } else if (action == 'delete') {
+                          final shouldDelete = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text("Delete Item"),
+                              content: Text("Are you sure to delete '${item.name}'?"),
+                              actions: [
+                                TextButton(
+                                  child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                                  onPressed: () => Navigator.pop(context, true),
+                                ),
+                                TextButton(
+                                  child: const Text("Cancel"),
+                                  onPressed: () => Navigator.pop(context, false),
+                                ),
+                              ],
                             ),
-                            TextButton(
-                              child: const Text("Delete", style: TextStyle(color: Colors.red)),
-                              onPressed: () => Navigator.pop(context, true),
+                          );
+                          if (shouldDelete == true) {
+                            await DBHelper.deleteItem(item.id!, item.name);
+                            if (!mounted) return;
+                            setState(() {});
+                          }
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              item.name,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.deepPurple,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              item.category,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.deepPurple.shade300,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              item.description,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontStyle: FontStyle.normal,
+                                color: Color.fromARGB(206, 255, 236, 236),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Price: \$${item.price.toStringAsFixed(2)}",
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                                const SizedBox(width: 24),
+                                Text(
+                                  "Qty: ${item.quantity}",
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Divider(color: Colors.deepPurple.shade100),
+                            const SizedBox(height: 6),
+                            Text(
+                              "Added: ${_formatDate(item.createdAt)}",
+                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                            if (item.updatedAt != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                "Edited: ${_formatDate(item.updatedAt!)}",
+                                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey),
+                              ),
+                            ],
+                            const SizedBox(height: 12),
+                            ElevatedButton.icon(
+                              onPressed: () => _sellItem(item),
+                              icon: const Icon(Icons.sell),
+                              label: const Text("Sell One"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
                             ),
                           ],
                         ),
-                      );
-                      if (shouldDelete == true) {
-                        await DBHelper.deleteItem(item.id!, item.name);
-                        if (!mounted) return;
-                        setState(() {});
-                      }
-                    },
+                      ),
+                    ),
                   );
                 },
               );

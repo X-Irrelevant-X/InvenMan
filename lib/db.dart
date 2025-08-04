@@ -1,9 +1,8 @@
-// db.dart
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:invenman/models/items.dart';
 import 'package:invenman/models/sold_items.dart';
-import 'package:invenman/models/item_history.dart';  // NEW
+import 'package:invenman/models/item_history.dart';
 
 class DBHelper {
   static Database? _db;
@@ -17,46 +16,72 @@ class DBHelper {
     final path = join(await getDatabasesPath(), 'inventory.db');
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
-        await db.execute('''CREATE TABLE items(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT,
-          description TEXT,
-          price REAL,
-          category TEXT,
-          quantity INTEGER)''');
-        await db.execute('''CREATE TABLE sold_items(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT,
-          costPrice REAL,
-          sellPrice REAL,
-          date TEXT)''');
-        await db.execute('''CREATE TABLE item_history(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT,
-          action TEXT,
-          date TEXT,
-          detail TEXT)''');
+        await db.execute('''
+          CREATE TABLE items(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            description TEXT,
+            price REAL,
+            category TEXT,
+            quantity INTEGER,
+            createdAt TEXT,
+            updatedAt TEXT
+          )
+        ''');
+
+        await db.execute('''
+          CREATE TABLE sold_items(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            costPrice REAL,
+            sellPrice REAL,
+            date TEXT
+          )
+        ''');
+
+        await db.execute('''
+          CREATE TABLE item_history(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            action TEXT,
+            date TEXT,
+            detail TEXT
+          )
+        ''');
+      },
+
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 3) {
+          await db.execute('ALTER TABLE items ADD COLUMN createdAt TEXT');
+          await db.execute('ALTER TABLE items ADD COLUMN updatedAt TEXT');
+        }
       },
     );
   }
 
   static Future<void> insertItem(Item item) async {
     final dbClient = await db;
-    await dbClient.insert('items', item.toMap());
+    await dbClient.insert('items', item.toJson()); // uses toJson for timestamps
     await logHistory(item.name, 'Added', 'Qty: ${item.quantity}, Price: ${item.price}');
+  }
+
+  static Future<void> updateItem(Item item) async {
+    final dbClient = await db;
+    await dbClient.update(
+      'items',
+      item.toJson(),
+      where: 'id = ?',
+      whereArgs: [item.id],
+    );
+    await logHistory(item.name, 'Edited', 'Qty: ${item.quantity}, Price: ${item.price}');
   }
 
   static Future<void> deleteItem(int id, String name) async {
     final dbClient = await db;
     await dbClient.delete('items', where: 'id = ?', whereArgs: [id]);
     await logHistory(name, 'Deleted', '');
-  }
-
-  static Future<void> updateItem(Item item) async {
-    final dbClient = await db;
-    await dbClient.update('items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
   }
 
   static Future<List<Item>> fetchItems({String sortBy = 'name'}) async {
@@ -80,7 +105,7 @@ class DBHelper {
       orderBy: '$orderByColumn $order',
     );
 
-    return List.generate(maps.length, (i) => Item.fromMap(maps[i]));
+    return List.generate(maps.length, (i) => Item.fromJson(maps[i]));
   }
 
   static Future<void> insertSoldItem(SoldItem item) async {
@@ -95,13 +120,12 @@ class DBHelper {
     return maps.map((map) => SoldItem.fromMap(map)).toList();
   }
 
-  // ------------- NEW: History
   static Future<void> logHistory(String name, String action, String detail) async {
     final dbClient = await db;
     await dbClient.insert('item_history', {
       'name': name,
       'action': action,
-      'date': DateTime.now().toString(),
+      'date': DateTime.now().toIso8601String(),
       'detail': detail,
     });
   }

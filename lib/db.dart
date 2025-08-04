@@ -1,9 +1,9 @@
 // db.dart
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:ivenman/models/items.dart';
-import 'package:ivenman/models/sold_items.dart';
-import 'package:ivenman/models/item_history.dart';  // NEW
+import 'package:invenman/models/items.dart';
+import 'package:invenman/models/sold_items.dart';
+import 'package:invenman/models/item_history.dart';  // NEW
 
 class DBHelper {
   static Database? _db;

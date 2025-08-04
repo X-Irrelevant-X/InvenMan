@@ -1,7 +1,6 @@
-// screens/historyscreen.dart
 import 'package:flutter/material.dart';
-import 'package:ivenman/db.dart';
-import 'package:ivenman/models/item_history.dart';
+import 'package:invenman/db.dart';
+import 'package:invenman/models/item_history.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});

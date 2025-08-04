@@ -1,10 +1,10 @@
-name: ivenman
-description: "Inventory Management App by Irrelevant"
+name: invenman
+description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: ^3.7.2
+  sdk: ^3.8.1
 
 dependencies:
   flutter:
@@ -16,7 +16,6 @@ dependencies:
   intl: any
   shared_preferences: any
   sqflite_common_ffi: any
-
 
 dev_dependencies:
   flutter_test:

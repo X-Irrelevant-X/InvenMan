@@ -1,4 +1,4 @@
-package com.example.ivenman
+package com.example.invenman
 
 import io.flutter.embedding.android.FlutterActivity
 

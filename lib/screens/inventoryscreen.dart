@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:ivenman/db.dart';
-import 'package:ivenman/models/items.dart';
-import 'package:ivenman/models/sold_items.dart';
+import 'package:invenman/db.dart';
+import 'package:invenman/models/items.dart';
+import 'package:invenman/models/sold_items.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});

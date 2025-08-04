@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ivenman/main.dart';
-import 'package:ivenman/screens/inventoryscreen.dart';
-import 'package:ivenman/screens/historyscreen.dart';
+import 'package:invenman/main.dart';
+import 'package:invenman/screens/inventoryscreen.dart';
+import 'package:invenman/screens/historyscreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_currentIndex == 0 ? 'Inventory' : 'Sold History'),
+        title: Text(_currentIndex == 0 ? 'InvenMan' : 'History'),
         actions: [
           IconButton(
             icon: Icon(

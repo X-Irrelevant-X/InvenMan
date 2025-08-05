@@ -56,7 +56,7 @@ class _InventoryPageState extends State<InventoryPage> {
           ),
         ),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () async {
               final item = Item(
                 name: nameController.text.trim(),
@@ -71,7 +71,16 @@ class _InventoryPageState extends State<InventoryPage> {
               Navigator.pop(context);
               setState(() {});
             },
-            child: const Text("Add"),
+            child: const Text("Add Item"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple, // Same color as Sell button
+              foregroundColor: Colors.white,     // Ensures text/icon is white
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8), // Rounded corners
+              ),
+              textStyle: const TextStyle(fontWeight: FontWeight.w600), // Optional: bolder text
+            ),
           )
         ],
       ),
@@ -80,7 +89,6 @@ class _InventoryPageState extends State<InventoryPage> {
 
   void _showEditItemDialog(Item item) {
     final descController = TextEditingController(text: item.description);
-    final priceController = TextEditingController(text: item.price.toString());
     final quantityController = TextEditingController(text: item.quantity.toString());
 
     showDialog(
@@ -202,19 +210,53 @@ class _InventoryPageState extends State<InventoryPage> {
                   isExpanded: true,
                   value: sortBy,
                   onChanged: (value) => setState(() => sortBy = value!),
+                  alignment: Alignment.center, 
                   items: const [
-                    DropdownMenuItem(value: 'name', child: Text("Name")),
-                    DropdownMenuItem(value: 'price_asc', child: Text("Price: Low to High")),
-                    DropdownMenuItem(value: 'price_desc', child: Text("Price: High to Low")),
-                    DropdownMenuItem(value: 'category', child: Text("Category")),
+                    DropdownMenuItem(
+                      value: 'name',
+                      child: Center(
+                        child: Text("Name"),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'price_asc',
+                      child: Center(
+                        child: Text("Price: Low to High"),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'price_desc',
+                      child: Center(
+                        child: Text("Price: High to Low"),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'category',
+                      child: Center(
+                        child: Text("Category"),
+                      ),
+                    ),
                   ],
+                  underline: Container(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 20),
               ElevatedButton.icon(
                 onPressed: _showAddItemDialog,
                 icon: const Icon(Icons.add),
                 label: const Text("Add Item"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  textStyle: const TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
+                ),
               ),
             ],
           ),
@@ -291,74 +333,96 @@ class _InventoryPageState extends State<InventoryPage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              item.name,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.deepPurple,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              item.category,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.deepPurple.shade300,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              item.description,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontStyle: FontStyle.normal,
-                                color: Color.fromARGB(206, 255, 236, 236),
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 12),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  "Price: \$${item.price.toStringAsFixed(2)}",
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                Flexible(
+                                  flex: 1,
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      item.category,
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.deepPurple.shade300,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
                                 ),
-                                const SizedBox(width: 24),
-                                Text(
-                                  "Qty: ${item.quantity}",
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
+
+                                Flexible(
+                                  flex: 3,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        item.name,
+                                        style: const TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.deepPurple,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        item.description,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontStyle: FontStyle.normal,
+                                          color: Color.fromARGB(206, 255, 236, 236),
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "Price:  \$${item.price.toStringAsFixed(0)} BDT,",
+                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                          ),
+                                          const SizedBox(width: 20),
+                                          Text(
+                                            "Qty: ${item.quantity}",
+                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Divider(color: Colors.deepPurple.shade100),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        "Added: ${_formatDate(item.createdAt)}",
+                                        style: const TextStyle(fontSize: 16, color: Colors.grey),
+                                      ),
+                                      if (item.updatedAt != null) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          "Edited: ${_formatDate(item.updatedAt!)}",
+                                          style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey),
+                                        ),
+                                      ],
+                                      const SizedBox(height: 10),
+                                      ElevatedButton.icon(
+                                        onPressed: () => _sellItem(item),
+                                        icon: const Icon(Icons.sell),
+                                        label: const Text("Sell"),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.deepPurple,
+                                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            Divider(color: Colors.deepPurple.shade100),
-                            const SizedBox(height: 6),
-                            Text(
-                              "Added: ${_formatDate(item.createdAt)}",
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
-                            ),
-                            if (item.updatedAt != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                "Edited: ${_formatDate(item.updatedAt!)}",
-                                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey),
-                              ),
-                            ],
-                            const SizedBox(height: 12),
-                            ElevatedButton.icon(
-                              onPressed: () => _sellItem(item),
-                              icon: const Icon(Icons.sell),
-                              label: const Text("Sell One"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepPurple,
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                            ),
+                            
                           ],
                         ),
                       ),

@@ -10,7 +10,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 class ThemeProvider with ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
 
-  ThemeMode get themeMode => _themeMode;
+  ThemeMode get themeMode => ThemeMode.dark;//_themeMode;
 
   ThemeProvider() {
     _loadThemeMode();
@@ -62,7 +62,7 @@ class InventoryApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Inventory Manager',
       themeMode: themeProvider.themeMode,
-      theme: ThemeData.light(),
+      theme: ThemeData.dark(), //ThemeData.light(),
       darkTheme: ThemeData.dark(),
       home: const HomeScreen(),
     );

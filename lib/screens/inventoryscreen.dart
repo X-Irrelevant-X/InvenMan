@@ -268,7 +268,7 @@ class _InventoryPageState extends State<InventoryPage> {
               if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
               final items = snapshot.data!;
               if (items.isEmpty) {
-                return const Center(child: Text('No items found.'));
+                return const Center(child: Text('No Products Found'));
               }
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -367,7 +367,6 @@ class _InventoryPageState extends State<InventoryPage> {
                                         textAlign: TextAlign.left,
                                       ),
                                       const SizedBox(height: 6),
-                                      const SizedBox(height: 8),
                                       Text(
                                         item.description,
                                         style: const TextStyle(
@@ -387,7 +386,7 @@ class _InventoryPageState extends State<InventoryPage> {
                                           ),
                                           const SizedBox(width: 20),
                                           Text(
-                                            "Qty: ${item.quantity}",
+                                            "Quantity: ${item.quantity}",
                                             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                                           ),
                                         ],

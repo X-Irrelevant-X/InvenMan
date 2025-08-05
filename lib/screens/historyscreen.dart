@@ -109,7 +109,6 @@ class HistoryPage extends StatelessWidget {
                                   "${item.name} - ${item.action}",
                                   style: const TextStyle(
                                     fontSize: 25,
-                                    fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
                                   textAlign: TextAlign.center,

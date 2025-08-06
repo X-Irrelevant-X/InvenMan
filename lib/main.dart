@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/homescreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-
+import 'db.dart'; 
 
 class ThemeProvider with ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
 
-  ThemeMode get themeMode => ThemeMode.dark;//_themeMode;
+  ThemeMode get themeMode => ThemeMode.dark;
 
   ThemeProvider() {
     _loadThemeMode();
@@ -33,15 +30,7 @@ class ThemeProvider with ChangeNotifier {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  if (defaultTargetPlatform == TargetPlatform.windows ||
-      defaultTargetPlatform == TargetPlatform.linux ||
-      defaultTargetPlatform == TargetPlatform.macOS) {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-  } else {
-    
-  }
+  await DBHelper.db;
 
   runApp(
     ChangeNotifierProvider(
@@ -62,7 +51,7 @@ class InventoryApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Inventory Manager',
       themeMode: themeProvider.themeMode,
-      theme: ThemeData.dark(), //ThemeData.light(),
+      theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       home: const HomeScreen(),
     );

@@ -1,13 +1,31 @@
+// db.dart
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:invenman/models/items.dart';
 import 'package:invenman/models/sold_items.dart';
 import 'package:invenman/models/item_history.dart';
 
 class DBHelper {
   static Database? _db;
+  static bool _isInitialized = false;
+
+  static Future<void> _initPlatform() async {
+    if (_isInitialized) return;
+    
+    if (defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
+      // Initialize FFI for desktop
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+
+    _isInitialized = true;
+  }
 
   static Future<Database> get db async {
+    await _initPlatform();
     _db ??= await _initDB();
     return _db!;
   }
@@ -51,7 +69,6 @@ class DBHelper {
           )
         ''');
       },
-
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 3) {
           await db.execute('ALTER TABLE items ADD COLUMN createdAt TEXT');
@@ -63,7 +80,7 @@ class DBHelper {
 
   static Future<void> insertItem(Item item) async {
     final dbClient = await db;
-    await dbClient.insert('items', item.toJson()); // uses toJson for timestamps
+    await dbClient.insert('items', item.toJson());
     await logHistory(item.name, 'Added', 'Qty: ${item.quantity}, Price: ${item.price}');
   }
 

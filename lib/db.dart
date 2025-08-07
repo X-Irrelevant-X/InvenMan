@@ -1,5 +1,5 @@
-// db.dart
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:invenman/models/items.dart';
@@ -7,16 +7,16 @@ import 'package:invenman/models/sold_items.dart';
 import 'package:invenman/models/item_history.dart';
 
 class DBHelper {
-  static Database? _db;
+  static sqflite.Database? _db;
   static bool _isInitialized = false;
 
   static Future<void> _initPlatform() async {
     if (_isInitialized) return;
-    
+
     if (defaultTargetPlatform == TargetPlatform.windows ||
         defaultTargetPlatform == TargetPlatform.linux ||
         defaultTargetPlatform == TargetPlatform.macOS) {
-      // Initialize FFI for desktop
+          
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
@@ -24,57 +24,66 @@ class DBHelper {
     _isInitialized = true;
   }
 
-  static Future<Database> get db async {
+  static Future<sqflite.Database> get db async {
     await _initPlatform();
     _db ??= await _initDB();
     return _db!;
   }
 
-  static Future<Database> _initDB() async {
-    final path = join(await getDatabasesPath(), 'inventory.db');
-    return openDatabase(
+  static Future<sqflite.Database> _initDB() async {
+    final path = join(await sqflite.getDatabasesPath(), 'inventory.db');
+
+    final factory = (defaultTargetPlatform == TargetPlatform.windows ||
+            defaultTargetPlatform == TargetPlatform.linux ||
+            defaultTargetPlatform == TargetPlatform.macOS)
+        ? databaseFactory
+        : sqflite.databaseFactory;
+
+    return factory.openDatabase(
       path,
-      version: 3,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE items(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            description TEXT,
-            price REAL,
-            category TEXT,
-            quantity INTEGER,
-            createdAt TEXT,
-            updatedAt TEXT
-          )
-        ''');
+      options: OpenDatabaseOptions(
+        version: 3,
+        onCreate: (db, version) async {
+          await db.execute('''
+            CREATE TABLE items(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT,
+              description TEXT,
+              price REAL,
+              category TEXT,
+              quantity INTEGER,
+              createdAt TEXT,
+              updatedAt TEXT
+            )
+          ''');
 
-        await db.execute('''
-          CREATE TABLE sold_items(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            costPrice REAL,
-            sellPrice REAL,
-            date TEXT
-          )
-        ''');
+          await db.execute('''
+            CREATE TABLE sold_items(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT,
+              costPrice REAL,
+              sellPrice REAL,
+              date TEXT
+            )
+          ''');
 
-        await db.execute('''
-          CREATE TABLE item_history(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            action TEXT,
-            date TEXT,
-            detail TEXT
-          )
-        ''');
-      },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 3) {
-          await db.execute('ALTER TABLE items ADD COLUMN createdAt TEXT');
-          await db.execute('ALTER TABLE items ADD COLUMN updatedAt TEXT');
-        }
-      },
+          await db.execute('''
+            CREATE TABLE item_history(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT,
+              action TEXT,
+              date TEXT,
+              detail TEXT
+            )
+          ''');
+        },
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 3) {
+            await db.execute('ALTER TABLE items ADD COLUMN createdAt TEXT');
+            await db.execute('ALTER TABLE items ADD COLUMN updatedAt TEXT');
+          }
+        },
+      ),
     );
   }
 

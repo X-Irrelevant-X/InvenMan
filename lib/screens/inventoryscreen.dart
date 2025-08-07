@@ -73,13 +73,13 @@ class _InventoryPageState extends State<InventoryPage> {
             },
             child: const Text("Add Item"),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple, // Same color as Sell button
-              foregroundColor: Colors.white,     // Ensures text/icon is white
+              backgroundColor: Colors.deepPurple, 
+              foregroundColor: Colors.white,     
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8), // Rounded corners
+                borderRadius: BorderRadius.circular(8),
               ),
-              textStyle: const TextStyle(fontWeight: FontWeight.w600), // Optional: bolder text
+              textStyle: const TextStyle(fontWeight: FontWeight.w600), 
             ),
           )
         ],
@@ -98,7 +98,6 @@ class _InventoryPageState extends State<InventoryPage> {
         content: SingleChildScrollView(
           child: Column(
             children: [
-              // Name and category shown but disabled
               TextField(
                 controller: TextEditingController(text: item.name),
                 decoration: const InputDecoration(labelText: "Name"),
@@ -286,7 +285,7 @@ class _InventoryPageState extends State<InventoryPage> {
                         final action = await showDialog<String>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text("Choose Action"),
+                            title: const Text("Choose Action:"),
                             actions: [
                               TextButton(
                                 child: const Text("Edit"),
